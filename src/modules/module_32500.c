@@ -30,10 +30,10 @@ static const u64   OPTS_TYPE      = OPTS_TYPE_STOCK_MODULE
                                     | OPTS_TYPE_PT_GENERATE_LE
                                     | OPTS_TYPE_PT_ADD80
                                     | OPTS_TYPE_PT_ADDBITS14;
-static const u32   SALT_TYPE      = SALT_TYPE_NONE;
+static const u32   SALT_TYPE      = SALT_TYPE_GENERIC;
 static const char *ST_PASS        = "password12345678";
 // connection request with 16 bytes of hash attached to it
-static const char *ST_HASH        = "3a0038186100000062000000d32cebdc000000003db1860000000000303330330a000000000000000000:5f974c76bd8213f882ff79f53af66960";
+static const char *ST_HASH        = "3a0038186100000062000000d32cebdc000000003db1860000000000303330330a000000000000000000$b04cab2f2e899f1082f1bbed9b5029bf";
 
 u32         module_attack_exec    (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return ATTACK_EXEC;     }
 u32         module_dgst_pos0      (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return DGST_POS0;       }
@@ -57,7 +57,7 @@ u32 *digest = (u32 *) digest_buf;
 hc_token_t token;
 
 token.token_cnt  = 2;
-token.sep[0]     = ':';
+token.sep[0]     = '$';
 
 token.len_min[0] = 1;
 token.len_max[0] = 2 * (sizeof(salt->salt_buf) - DGST_SIZE_4_4);
@@ -129,7 +129,9 @@ tmp[3] += MD4M_D;
 }
  */
 
-u8 *out_buf = &((u8 *) line_buf)[2*salt->salt_len],
+line_buf[2*salt->salt_len] = '$';
+
+u8 *out_buf = &((u8 *) line_buf)[2*salt->salt_len + 1],
 *salt_buf = (u8*) line_buf,
 *salt_val = (u8*) salt->salt_buf;
 
@@ -142,7 +144,7 @@ for(u32 i = 0; i< salt->salt_len; i++){
     u8_to_hex(salt_val[i],&salt_buf[i*2]);
 }
 
-const int out_len = 32 + 2*salt->salt_len;
+const int out_len = 32 + 2*salt->salt_len + 1;
 
 return out_len;
 }

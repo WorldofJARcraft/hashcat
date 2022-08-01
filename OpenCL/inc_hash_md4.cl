@@ -87,7 +87,7 @@ DECLSPEC void md4_transform (PRIVATE_AS const u32 *w0, PRIVATE_AS const u32 *w1,
     for(u32 offset = 0; offset < pw_len;offset+=sizeof(u32)){ \
         const u32 remaining_bytes_pw = pw_len - offset;                                               \
         if(remaining_bytes_pw >= sizeof(u32)){ \
-            ctx->h[offset/sizeof(u32)] = hc_swap32_S(pw[offset/sizeof(u32)]);              \
+            ctx->h[offset/sizeof(u32)] = pw[offset/sizeof(u32)];              \
         } \
         else{                                         \
             const u32 offset_words = offset/sizeof(u32);                                           \
