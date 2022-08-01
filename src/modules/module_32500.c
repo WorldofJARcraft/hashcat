@@ -16,8 +16,8 @@ static const u32   DGST_POS1      = 3;
 static const u32   DGST_POS2      = 2;
 static const u32   DGST_POS3      = 1;
 static const u32   DGST_SIZE      = DGST_SIZE_4_4;
-static const u32   HASH_CATEGORY  = HASH_CATEGORY_RAW_HASH;
-static const char *HASH_NAME      = "RaSTA";
+static const u32   HASH_CATEGORY  = HASH_CATEGORY_NETWORK_PROTOCOL;
+static const char *HASH_NAME      = "RaSTA (Rail Safe Transport Application)";
 static const u64   KERN_TYPE      = 32500;
 static const u32   OPTI_TYPE      = OPTI_TYPE_ZERO_BYTE
                                     | OPTI_TYPE_PRECOMPUTE_INIT

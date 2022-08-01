@@ -85,15 +85,16 @@ DECLSPEC void md4_transform (PRIVATE_AS const u32 *w0, PRIVATE_AS const u32 *w1,
     ctx->h[3] = MD4M_D; \
  \
     for(u32 offset = 0; offset < pw_len;offset+=sizeof(u32)){ \
-        if(pw_len >= sizeof(u32)){ \
+        const u32 remaining_bytes_pw = pw_len - offset;                                               \
+        if(remaining_bytes_pw >= sizeof(u32)){ \
             ctx->h[offset/sizeof(u32)] = hc_swap32_S(pw[offset/sizeof(u32)]);              \
         } \
-        else{ \
-            u8 *remaining_bytes = (u8*) &pw[offset]; \
-            u8* target = (u8*) &ctx->h[offset];       \
-            int store_offset=0;\
-            for(u32 remaining = pw_len - offset*sizeof(u32); remaining > 0 ; remaining--){ \
-                target[store_offset++] = remaining_bytes[remaining]; \
+        else{                                         \
+            const u32 offset_words = offset/sizeof(u32);                                           \
+            u8 *remaining_bytes = (u8*) &pw[offset_words]; \
+            u8* target = (u8*) &ctx->h[offset_words];       \
+            for(u32 remaining = 0; remaining < remaining_bytes_pw; remaining++){ \
+                target[remaining] = remaining_bytes[remaining];                       \
             } \
         } \
     }
@@ -101,6 +102,7 @@ DECLSPEC void md4_transform (PRIVATE_AS const u32 *w0, PRIVATE_AS const u32 *w1,
 
 DECLSPEC void md4_init_custom_vector (PRIVATE_AS md4_ctx_vector_t *ctx, PRIVATE_AS u32 *pw, PRIVATE_AS u32 pw_len){
     md4_map_custom_pw_to_context(ctx,pw,pw_len);
+
     ctx->w0[0] = 0;
     ctx->w0[1] = 0;
     ctx->w0[2] = 0;
@@ -123,7 +125,6 @@ DECLSPEC void md4_init_custom_vector (PRIVATE_AS md4_ctx_vector_t *ctx, PRIVATE_
 
 DECLSPEC void md4_init_custom (PRIVATE_AS md4_ctx_t *ctx, PRIVATE_AS pw_t *pw){
     md4_map_custom_pw_to_context(ctx,pw->i,pw->pw_len);
-
     ctx->w0[0] = 0;
     ctx->w0[1] = 0;
     ctx->w0[2] = 0;
