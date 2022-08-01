@@ -78,31 +78,97 @@ DECLSPEC void md4_transform (PRIVATE_AS const u32 *w0, PRIVATE_AS const u32 *w1,
   digest[3] += d;
 }
 
+#define md4_map_custom_pw_to_context(ctx, pw, pw_len) \
+    ctx->h[0] = MD4M_A; \
+    ctx->h[1] = MD4M_B; \
+    ctx->h[2] = MD4M_C; \
+    ctx->h[3] = MD4M_D; \
+ \
+    for(u32 offset = 0; offset < pw_len;offset+=sizeof(u32)){ \
+        if(pw_len >= sizeof(u32)){ \
+            ctx->h[offset/sizeof(u32)] = hc_swap32_S(pw[offset/sizeof(u32)]);              \
+        } \
+        else{ \
+            u8 *remaining_bytes = (u8*) &pw[offset]; \
+            u8* target = (u8*) &ctx->h[offset];       \
+            int store_offset=0;\
+            for(u32 remaining = pw_len - offset*sizeof(u32); remaining > 0 ; remaining--){ \
+                target[store_offset++] = remaining_bytes[remaining]; \
+            } \
+        } \
+    }
+
+
+DECLSPEC void md4_init_custom_vector (PRIVATE_AS md4_ctx_vector_t *ctx, PRIVATE_AS u32 *pw, PRIVATE_AS u32 pw_len){
+    md4_map_custom_pw_to_context(ctx,pw,pw_len);
+    ctx->w0[0] = 0;
+    ctx->w0[1] = 0;
+    ctx->w0[2] = 0;
+    ctx->w0[3] = 0;
+    ctx->w1[0] = 0;
+    ctx->w1[1] = 0;
+    ctx->w1[2] = 0;
+    ctx->w1[3] = 0;
+    ctx->w2[0] = 0;
+    ctx->w2[1] = 0;
+    ctx->w2[2] = 0;
+    ctx->w2[3] = 0;
+    ctx->w3[0] = 0;
+    ctx->w3[1] = 0;
+    ctx->w3[2] = 0;
+    ctx->w3[3] = 0;
+
+    ctx->len = 0;
+}
+
+DECLSPEC void md4_init_custom (PRIVATE_AS md4_ctx_t *ctx, PRIVATE_AS pw_t *pw){
+    md4_map_custom_pw_to_context(ctx,pw->i,pw->pw_len);
+
+    ctx->w0[0] = 0;
+    ctx->w0[1] = 0;
+    ctx->w0[2] = 0;
+    ctx->w0[3] = 0;
+    ctx->w1[0] = 0;
+    ctx->w1[1] = 0;
+    ctx->w1[2] = 0;
+    ctx->w1[3] = 0;
+    ctx->w2[0] = 0;
+    ctx->w2[1] = 0;
+    ctx->w2[2] = 0;
+    ctx->w2[3] = 0;
+    ctx->w3[0] = 0;
+    ctx->w3[1] = 0;
+    ctx->w3[2] = 0;
+    ctx->w3[3] = 0;
+
+    ctx->len = 0;
+
+}
 DECLSPEC void md4_init (PRIVATE_AS md4_ctx_t *ctx)
 {
-  ctx->h[0] = MD4M_A;
-  ctx->h[1] = MD4M_B;
-  ctx->h[2] = MD4M_C;
-  ctx->h[3] = MD4M_D;
+    ctx->h[0] = MD4M_A;
+    ctx->h[1] = MD4M_B;
+    ctx->h[2] = MD4M_C;
+    ctx->h[3] = MD4M_D;
 
-  ctx->w0[0] = 0;
-  ctx->w0[1] = 0;
-  ctx->w0[2] = 0;
-  ctx->w0[3] = 0;
-  ctx->w1[0] = 0;
-  ctx->w1[1] = 0;
-  ctx->w1[2] = 0;
-  ctx->w1[3] = 0;
-  ctx->w2[0] = 0;
-  ctx->w2[1] = 0;
-  ctx->w2[2] = 0;
-  ctx->w2[3] = 0;
-  ctx->w3[0] = 0;
-  ctx->w3[1] = 0;
-  ctx->w3[2] = 0;
-  ctx->w3[3] = 0;
+    ctx->w0[0] = 0;
+    ctx->w0[1] = 0;
+    ctx->w0[2] = 0;
+    ctx->w0[3] = 0;
+    ctx->w1[0] = 0;
+    ctx->w1[1] = 0;
+    ctx->w1[2] = 0;
+    ctx->w1[3] = 0;
+    ctx->w2[0] = 0;
+    ctx->w2[1] = 0;
+    ctx->w2[2] = 0;
+    ctx->w2[3] = 0;
+    ctx->w3[0] = 0;
+    ctx->w3[1] = 0;
+    ctx->w3[2] = 0;
+    ctx->w3[3] = 0;
 
-  ctx->len = 0;
+    ctx->len = 0;
 }
 
 DECLSPEC void md4_update_64 (PRIVATE_AS  md4_ctx_t *ctx, PRIVATE_AS  u32 *w0, PRIVATE_AS  u32 *w1, PRIVATE_AS  u32 *w2, PRIVATE_AS  u32 *w3, const int len)

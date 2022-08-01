@@ -84,6 +84,7 @@ typedef struct md4_hmac_ctx_vector
 
 DECLSPEC void md4_transform (PRIVATE_AS const u32 *w0, PRIVATE_AS const u32 *w1, PRIVATE_AS const u32 *w2, PRIVATE_AS const u32 *w3, PRIVATE_AS u32 *digest);
 DECLSPEC void md4_init (PRIVATE_AS md4_ctx_t *ctx);
+DECLSPEC void md4_init_custom (PRIVATE_AS md4_ctx_t *ctx, PRIVATE_AS pw_t *pw);
 DECLSPEC void md4_update_64 (PRIVATE_AS md4_ctx_t *ctx, PRIVATE_AS u32 *w0, PRIVATE_AS u32 *w1, PRIVATE_AS u32 *w2, PRIVATE_AS u32 *w3, const int len);
 DECLSPEC void md4_update (PRIVATE_AS md4_ctx_t *ctx, PRIVATE_AS const u32 *w, const int len);
 DECLSPEC void md4_update_swap (PRIVATE_AS md4_ctx_t *ctx, PRIVATE_AS const u32 *w, const int len);
@@ -111,6 +112,7 @@ DECLSPEC void md4_hmac_update_global_utf16le_swap (PRIVATE_AS md4_hmac_ctx_t *ct
 DECLSPEC void md4_hmac_final (PRIVATE_AS md4_hmac_ctx_t *ctx);
 DECLSPEC void md4_transform_vector (PRIVATE_AS const u32x *w0, PRIVATE_AS const u32x *w1, PRIVATE_AS const u32x *w2, PRIVATE_AS const u32x *w3, PRIVATE_AS u32x *digest);
 DECLSPEC void md4_init_vector (PRIVATE_AS md4_ctx_vector_t *ctx);
+DECLSPEC void md4_init_custom_vector (PRIVATE_AS md4_ctx_vector_t *ctx, PRIVATE_AS u32 *pw, PRIVATE_AS u32 pw_len);
 DECLSPEC void md4_init_vector_from_scalar (PRIVATE_AS md4_ctx_vector_t *ctx, PRIVATE_AS md4_ctx_t *ctx0);
 DECLSPEC void md4_update_vector_64 (PRIVATE_AS md4_ctx_vector_t *ctx, PRIVATE_AS u32x *w0, PRIVATE_AS u32x *w1, PRIVATE_AS u32x *w2, PRIVATE_AS u32x *w3, const int len);
 DECLSPEC void md4_update_vector (PRIVATE_AS md4_ctx_vector_t *ctx, PRIVATE_AS const u32x *w, const int len);
