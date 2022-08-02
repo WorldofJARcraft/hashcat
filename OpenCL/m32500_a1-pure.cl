@@ -36,7 +36,7 @@ KERNEL_FQ void m32500_mxx (KERN_ATTR_BASIC ())
 
     md4_init_custom (&ctx, &combs_buf[il_pos]);
 
-    md4_update (&ctx, salt_bufs->salt_buf,salt_bufs->salt_len);
+    md4_update (&ctx, salt_bufs[SALT_POS_HOST].salt_buf,salt_bufs[SALT_POS_HOST].salt_len);
 
     md4_final (&ctx);
 
@@ -83,7 +83,7 @@ KERNEL_FQ void m32500_sxx (KERN_ATTR_BASIC ())
 
     md4_init_custom (&ctx, &combs_buf[il_pos]);
 
-    md4_update (&ctx, salt_bufs->salt_buf,salt_bufs->salt_len);
+    md4_update (&ctx, salt_bufs[SALT_POS_HOST].salt_buf,salt_bufs[SALT_POS_HOST].salt_len);
 
     md4_final (&ctx);
 

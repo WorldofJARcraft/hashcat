@@ -67,7 +67,6 @@ token.len_min[1] = 32;
 token.len_max[1] = 32;
 token.attr[1] = TOKEN_ATTR_VERIFY_HEX|TOKEN_ATTR_VERIFY_LENGTH;
 
-
 const int rc_tokenizer = input_tokenizer ((const u8 *) line_buf, line_len, &token);
 
 if (rc_tokenizer != PARSER_OK) return (rc_tokenizer);

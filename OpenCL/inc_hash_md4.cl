@@ -125,6 +125,7 @@ DECLSPEC void md4_init_custom_vector (PRIVATE_AS md4_ctx_vector_t *ctx, PRIVATE_
 
 DECLSPEC void md4_init_custom (PRIVATE_AS md4_ctx_t *ctx, PRIVATE_AS pw_t *pw){
     md4_map_custom_pw_to_context(ctx,pw->i,pw->pw_len);
+
     ctx->w0[0] = 0;
     ctx->w0[1] = 0;
     ctx->w0[2] = 0;

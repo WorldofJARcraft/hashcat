@@ -56,7 +56,7 @@ KERNEL_FQ void m32500_mxx (KERN_ATTR_VECTOR ())
 
     md4_init_custom_vector (&ctx,w,pw_len);
 
-    md4_update_vector (&ctx, salt_bufs->salt_buf,salt_bufs->salt_len);
+    md4_update_vector (&ctx, salt_bufs[SALT_POS_HOST].salt_buf,salt_bufs[SALT_POS_HOST].salt_len);
 
     md4_final_vector (&ctx);
 
@@ -123,7 +123,7 @@ KERNEL_FQ void m32500_sxx (KERN_ATTR_VECTOR ())
 
     md4_init_custom_vector (&ctx,w,pw_len);
 
-    md4_update_vector (&ctx, salt_bufs->salt_buf,salt_bufs->salt_len);
+    md4_update_vector (&ctx, salt_bufs[SALT_POS_HOST].salt_buf,salt_bufs[SALT_POS_HOST].salt_len);
 
     md4_final_vector (&ctx);
 
