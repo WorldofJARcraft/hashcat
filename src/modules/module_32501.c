@@ -11,14 +11,17 @@
 #include "shared.h"
 
 static const u32   ATTACK_EXEC    = ATTACK_EXEC_INSIDE_KERNEL;
+// only compare 0 and 1, other bytes are irrelevant
 static const u32   DGST_POS0      = 0;
-static const u32   DGST_POS1      = 3;
-static const u32   DGST_POS2      = 2;
-static const u32   DGST_POS3      = 1;
+static const u32   DGST_POS1      = 1;
+static const u32   DGST_POS2      = 0;
+static const u32   DGST_POS3      = 0;
 static const u32   DGST_SIZE      = DGST_SIZE_4_4;
 static const u32   HASH_CATEGORY  = HASH_CATEGORY_NETWORK_PROTOCOL;
-static const char *HASH_NAME      = "RaSTA (Rail Safe Transport Application) Safety Code - Full Length";
-static const u64   KERN_TYPE      = 32500;
+static const char *HASH_NAME      = "RaSTA (Rail Safe Transport Application) Safety Code - Half Length";
+static const u64   KERN_TYPE_PURE = 32500;
+static const u64   KERN_TYPE_OPT  = 32501;
+
 static const u32   OPTI_TYPE      = OPTI_TYPE_ZERO_BYTE
                                     | OPTI_TYPE_PRECOMPUTE_INIT
                                     | OPTI_TYPE_MEET_IN_MIDDLE
@@ -32,8 +35,8 @@ static const u64   OPTS_TYPE      = OPTS_TYPE_STOCK_MODULE
                                     | OPTS_TYPE_PT_ADDBITS14;
 static const u32   SALT_TYPE      = SALT_TYPE_GENERIC;
 static const char *ST_PASS        = "password12345678";
-// heartbeat with 16 bytes of safety code
-static const char *ST_HASH        = "2c004c186200000061000000e489fb4ae589fb4ab69c1e00e8941e00$2d3da7be76195d8a10e943f25b4e87ef";
+// heartbeat with 8 bytes of safety code
+static const char *ST_HASH        = "24004c18610000006200000061ff7e975fff7e9728af9e0022af9e00$474aa1929d2eba5d";
 
 u32         module_attack_exec    (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return ATTACK_EXEC;     }
 u32         module_dgst_pos0      (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return DGST_POS0;       }
@@ -43,7 +46,15 @@ u32         module_dgst_pos3      (MAYBE_UNUSED const hashconfig_t *hashconfig, 
 u32         module_dgst_size      (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return DGST_SIZE;       }
 u32         module_hash_category  (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return HASH_CATEGORY;   }
 const char *module_hash_name      (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return HASH_NAME;       }
-u64         module_kern_type      (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return KERN_TYPE;       }
+u64         module_kern_type      (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return KERN_TYPE_PURE;  }
+// need kernel with changed comparison in dynamic
+u64         module_kern_type_dynamic(MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const void *digest_buf, MAYBE_UNUSED const salt_t *salt, MAYBE_UNUSED const void *esalt_buf, MAYBE_UNUSED const void *hook_salt_buf, MAYBE_UNUSED const hashinfo_t *hash_info){
+    if(hashconfig->opti_type & OPTI_TYPE_OPTIMIZED_KERNEL){
+        return KERN_TYPE_OPT;
+    }
+    return KERN_TYPE_PURE;
+}
+
 u32         module_opti_type      (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return OPTI_TYPE;       }
 u64         module_opts_type      (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return OPTS_TYPE;       }
 u32         module_salt_type      (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return SALT_TYPE;       }
@@ -60,11 +71,11 @@ token.token_cnt  = 2;
 token.sep[0]     = '$';
 
 token.len_min[0] = 1;
-token.len_max[0] = 2 * sizeof(salt->salt_buf);
+token.len_max[0] = 2 * (sizeof(salt->salt_buf));
 token.attr[0]    = TOKEN_ATTR_VERIFY_HEX|TOKEN_ATTR_VERIFY_LENGTH;
 
-token.len_min[1] = 32;
-token.len_max[1] = 32;
+token.len_min[1] = 16;
+token.len_max[1] = 16;
 token.attr[1] = TOKEN_ATTR_VERIFY_HEX|TOKEN_ATTR_VERIFY_LENGTH;
 
 const int rc_tokenizer = input_tokenizer ((const u8 *) line_buf, line_len, &token);
@@ -77,8 +88,10 @@ const u8 *hash_pos = token.buf[1];
 
 digest[0] = hex_to_u32 (hash_pos +  0);
 digest[1] = hex_to_u32 (hash_pos +  8);
-digest[2] = hex_to_u32 (hash_pos + 16);
-digest[3] = hex_to_u32 (hash_pos + 24);
+digest[2] = digest[0];
+digest[3] = digest[1];
+
+printf("Target digest: %x, %x\n",digest[0],digest[1]);
 
 const u8 *digest_pos = token.buf[0];
 const int digest_len = token.len[0];
@@ -100,12 +113,10 @@ const u32 *digest = (const u32 *) digest_buf;
 // we can not change anything in the original buffer, otherwise destroying sorting
 // therefore create some local buffer
 
-u32 tmp[4];
+u32 tmp[2];
 
 tmp[0] = digest[0];
 tmp[1] = digest[1];
-tmp[2] = digest[2];
-tmp[3] = digest[3];
 
 line_buf[2*salt->salt_len] = '$';
 
@@ -115,14 +126,12 @@ u8 *out_buf = &((u8 *) line_buf)[2*salt->salt_len + 1],
 
 u32_to_hex (tmp[0], out_buf +  0);
 u32_to_hex (tmp[1], out_buf +  8);
-u32_to_hex (tmp[2], out_buf + 16);
-u32_to_hex (tmp[3], out_buf + 24);
 
 for(u32 i = 0; i< salt->salt_len; i++){
     u8_to_hex(salt_val[i],&salt_buf[i*2]);
 }
 
-const int out_len = 32 + 2*salt->salt_len + 1;
+const int out_len = 16 + 2*salt->salt_len + 1;
 
 return out_len;
 }
@@ -185,7 +194,7 @@ void module_init (module_ctx_t *module_ctx)
     module_ctx->module_kernel_threads_max       = MODULE_DEFAULT;
     module_ctx->module_kernel_threads_min       = MODULE_DEFAULT;
     module_ctx->module_kern_type                = module_kern_type;
-    module_ctx->module_kern_type_dynamic        = MODULE_DEFAULT;
+    module_ctx->module_kern_type_dynamic        = module_kern_type_dynamic;
     module_ctx->module_opti_type                = module_opti_type;
     module_ctx->module_opts_type                = module_opts_type;
     module_ctx->module_outfile_check_disable    = MODULE_DEFAULT;
