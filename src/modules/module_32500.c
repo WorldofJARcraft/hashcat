@@ -32,8 +32,8 @@ static const u64   OPTS_TYPE      = OPTS_TYPE_STOCK_MODULE
                                     | OPTS_TYPE_PT_ADDBITS14;
 static const u32   SALT_TYPE      = SALT_TYPE_GENERIC;
 static const char *ST_PASS        = "password12345678";
-// connection request with 16 bytes of hash attached to it
-static const char *ST_HASH        = "3a0038186100000062000000d32cebdc000000003db1860000000000303330330a000000000000000000$b04cab2f2e899f1082f1bbed9b5029bf";
+// heartbeat with 16 bytes of safety code
+static const char *ST_HASH        = "2c004c186200000061000000e489fb4ae589fb4ab69c1e00e8941e00$2d3da7be76195d8a10e943f25b4e87ef";
 
 u32         module_attack_exec    (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return ATTACK_EXEC;     }
 u32         module_dgst_pos0      (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSED const user_options_t *user_options, MAYBE_UNUSED const user_options_extra_t *user_options_extra) { return DGST_POS0;       }
@@ -90,16 +90,6 @@ for(int i = 0; i < digest_len; i+=2){
 }
 salt->salt_len=digest_len/2;
 
-/* TODO dont
- * if (hashconfig->opti_type & OPTI_TYPE_OPTIMIZED_KERNEL)
-{
-digest[0] -= MD4M_A;
-digest[1] -= MD4M_B;
-digest[2] -= MD4M_C;
-digest[3] -= MD4M_D;
-}
-*/
-
 return (PARSER_OK);
 }
 
@@ -116,17 +106,6 @@ tmp[0] = digest[0];
 tmp[1] = digest[1];
 tmp[2] = digest[2];
 tmp[3] = digest[3];
-
-/*
- * TODO dont
-if (hashconfig->opti_type & OPTI_TYPE_OPTIMIZED_KERNEL)
-{
-tmp[0] += MD4M_A;
-tmp[1] += MD4M_B;
-tmp[2] += MD4M_C;
-tmp[3] += MD4M_D;
-}
- */
 
 line_buf[2*salt->salt_len] = '$';
 

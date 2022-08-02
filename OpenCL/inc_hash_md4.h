@@ -42,6 +42,27 @@
   a  = hc_rotl32 (a, s);              \
 }
 
+#define md4_map_custom_pw_to_context(h, pw, pw_len, type) \
+    h[0] = MD4M_A; \
+    h[1] = MD4M_B; \
+    h[2] = MD4M_C; \
+    h[3] = MD4M_D; \
+ \
+    for(type offset = 0; offset < pw_len;offset+=sizeof(type)){ \
+        const type remaining_bytes_pw = pw_len - offset;                                               \
+        if(remaining_bytes_pw >= sizeof(type)){ \
+            h[offset/sizeof(type)] = pw[offset/sizeof(type)];              \
+        } \
+        else{                                         \
+            const type offset_words = offset/sizeof(type);                                           \
+            u8 *remaining_bytes = (u8*) &pw[offset_words]; \
+            u8* target = (u8*) &h[offset_words];       \
+            for(type remaining = 0; remaining < remaining_bytes_pw; remaining++){ \
+                target[remaining] = remaining_bytes[remaining];                       \
+            } \
+        } \
+    }
+
 typedef struct md4_ctx
 {
   u32 h[4];

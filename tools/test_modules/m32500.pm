@@ -13,16 +13,20 @@ use lib "$FindBin::Bin/test_util";
 
 use md4 qw (md4_hex);
 
-sub module_constraints { [[0, 16], [0, 256], [0, 16], [0, 27], [16, 256]] }
+sub module_constraints { [[0, 16], [0, 256], [0, 16], [0, 27], [-1, -1]] }
 
 sub module_generate_hash
 {
   my $pw = shift;
   my $salt = shift;
   my @vector = password_to_vector($pw);
-  $salt = $salt ? $salt : random_bytes(32);
+  $salt = $salt ? $salt : random_bytes(27);
   my $digest = md4_hex ($salt,@vector);
+
+  my $salt_len = length($salt);
+
   $salt =  unpack 'H*', $salt;
+
   return $salt.'$'.$digest;
 }
 
