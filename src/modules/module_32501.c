@@ -91,8 +91,6 @@ digest[1] = hex_to_u32 (hash_pos +  8);
 digest[2] = digest[0];
 digest[3] = digest[1];
 
-printf("Target digest: %x, %x\n",digest[0],digest[1]);
-
 const u8 *digest_pos = token.buf[0];
 const int digest_len = token.len[0];
 
